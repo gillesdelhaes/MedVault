@@ -1,0 +1,232 @@
+/* ─── Calendar container ─────────────────────────────────── */
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.calendar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 180px;
+  text-align: center;
+}
+
+.calendar-view-toggle {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.calendar-patient-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+}
+
+.calendar-patient-filter select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* ─── Month view grid ────────────────────────────────────── */
+.cal-month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-left: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.cal-day-header {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.cal-cell {
+  min-height: 96px;
+  padding: var(--space-2) var(--space-2);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  cursor: default;
+}
+
+.cal-cell:hover { background: var(--color-bg); }
+
+.cal-cell--other-month {
+  background: #fafafa;
+}
+
+.cal-cell--other-month .cal-date-num {
+  color: #ccc;
+}
+
+.cal-cell--today {
+  background: var(--color-primary-light);
+}
+
+.cal-cell--today .cal-date-num {
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-date-num {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  display: inline-block;
+  margin-bottom: var(--space-1);
+}
+
+.cal-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: var(--space-1);
+}
+
+/* ─── Calendar dots ──────────────────────────────────────── */
+.cal-dot {
+  --patient-color: var(--color-primary);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--patient-color);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
+}
+
+.cal-dot:hover {
+  transform: scale(1.4);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Symptom dot = square */
+.cal-dot--symptom {
+  border-radius: var(--radius-sm);
+}
+
+/* Medication dot = rounded rect with opacity */
+.cal-dot--medication {
+  border-radius: 3px;
+  opacity: 0.75;
+}
+
+/* ─── Week view ──────────────────────────────────────────── */
+.cal-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-2);
+}
+
+.cal-week-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cal-week-header {
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: var(--space-2);
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: var(--space-2);
+}
+
+.cal-week-header.today {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ─── Calendar event card (week view) ────────────────────── */
+.cal-event-card {
+  --patient-color: var(--color-primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--patient-color);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: box-shadow var(--transition);
+  line-height: 1.4;
+}
+
+.cal-event-card:hover { box-shadow: var(--shadow-md); }
+
+.cal-event-card__title {
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-event-card__meta {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+/* ─── Legend ─────────────────────────────────────────────── */
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  margin-top: var(--space-4);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cal-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+
+.cal-legend-dot--symptom  { border-radius: 2px; }
+.cal-legend-dot--med      { border-radius: 2px; opacity: 0.75; }
