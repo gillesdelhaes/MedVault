@@ -7,7 +7,7 @@ from routers import auth, patients, appointments, symptoms, medications, calenda
 from routers import setup
 import secrets_manager
 
-app = FastAPI(title="MedVault", version="1.0.0")
+app = FastAPI(title="MedVault", version="1.0.0", docs_url=None, redoc_url=None)
 
 
 @app.middleware("http")
