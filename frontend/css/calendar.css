@@ -134,15 +134,19 @@
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Symptom dot = square */
+/* Symptom dot = diamond */
 .cal-dot--symptom {
-  border-radius: var(--radius-sm);
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  transform: rotate(45deg);
 }
 
-/* Medication dot = rounded rect with opacity */
+/* Medication dot = horizontal pill */
 .cal-dot--medication {
-  border-radius: 3px;
-  opacity: 0.75;
+  width: 14px;
+  height: 7px;
+  border-radius: 50px;
 }
 
 /* ─── Week view ──────────────────────────────────────────── */
@@ -228,5 +232,5 @@
   background: var(--color-text-muted);
 }
 
-.cal-legend-dot--symptom  { border-radius: 2px; }
-.cal-legend-dot--med      { border-radius: 2px; opacity: 0.75; }
+.cal-legend-dot--symptom  { border-radius: 2px; transform: rotate(45deg); width: 8px; height: 8px; }
+.cal-legend-dot--med      { border-radius: 50px; width: 14px; height: 7px; }

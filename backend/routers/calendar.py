@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 from auth import get_current_user
 from database import get_db
@@ -87,7 +87,7 @@ def get_calendar(
                 patient_id=med.patient_id,
                 patient_name=p.name,
                 patient_color=p.color,
-                datetime=datetime.combine(current, datetime.min.time()),
+                datetime=datetime.combine(current, datetime.min.time(), tzinfo=timezone.utc),
                 title=f"{med.name} {med.dosage}",
                 detail=f"{med.frequency_per_day}x/day",
                 is_ongoing=med.is_ongoing,
