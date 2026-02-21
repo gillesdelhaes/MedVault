@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional, List
 import datetime as dt
+from datetime import timezone
 
 from auth import get_current_user
 from database import get_db
@@ -92,5 +93,5 @@ def search(
                     datetime=None,
                 ))
 
-    results.sort(key=lambda r: r.datetime or dt.datetime.min, reverse=True)
+    results.sort(key=lambda r: r.datetime or dt.datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     return SearchResponse(results=results, count=len(results))

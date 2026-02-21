@@ -1,6 +1,6 @@
+import datetime as dt
 from pydantic import BaseModel
 from typing import Optional, List
-from datetime import datetime
 
 
 class CalendarEvent(BaseModel):
@@ -9,7 +9,7 @@ class CalendarEvent(BaseModel):
     patient_id: str
     patient_name: str
     patient_color: str
-    datetime: datetime
+    datetime: dt.datetime
     title: str
     detail: Optional[str] = None
     follow_up_required: Optional[bool] = None
