@@ -54,7 +54,7 @@ async function renderAppointmentsView() {
     if (!list.length) { el.innerHTML = emptyState('No appointments found.'); return; }
     el.innerHTML = `<div class="table-wrapper"><table>
       <thead><tr>
-        <th>Date & Time</th><th>Patient</th><th>Provider</th><th>Reason</th><th>Follow-up</th><th></th>
+        <th>Date & Time</th><th>Patient</th><th>Provider</th><th class="col-optional">Reason</th><th class="col-optional">Follow-up</th><th></th>
       </tr></thead>
       <tbody>${list.map(a => {
         const p = patientMap[a.patient_id];
@@ -62,8 +62,8 @@ async function renderAppointmentsView() {
           <td style="white-space:nowrap">${formatDateTime(a.datetime)}</td>
           <td>${patientBadge(p)}</td>
           <td>${escapeHtml(a.provider_name)}</td>
-          <td>${escapeHtml(a.reason || '—')}</td>
-          <td>${a.follow_up_required ? '<span class="badge badge--warning">Yes</span>' : '<span class="badge badge--muted">No</span>'}</td>
+          <td class="col-optional">${escapeHtml(a.reason || '—')}</td>
+          <td class="col-optional">${a.follow_up_required ? '<span class="badge badge--warning">Yes</span>' : '<span class="badge badge--muted">No</span>'}</td>
           <td class="td-actions">
             <button class="btn--icon edit-appt" data-id="${a.id}" title="Edit">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

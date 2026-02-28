@@ -60,7 +60,7 @@ async function renderSymptomsView() {
     if (!list.length) { el.innerHTML = emptyState('No symptom logs found.'); return; }
     el.innerHTML = `<div class="table-wrapper"><table>
       <thead><tr>
-        <th>Date</th><th>Patient</th><th>Severity</th><th>Description</th><th>Resolved</th><th></th>
+        <th>Date</th><th>Patient</th><th>Severity</th><th class="col-optional">Description</th><th class="col-optional">Resolved</th><th></th>
       </tr></thead>
       <tbody>${list.map(s => {
         const p = patientMap[s.patient_id];
@@ -68,8 +68,8 @@ async function renderSymptomsView() {
           <td style="white-space:nowrap">${formatDateTime(s.logged_at)}</td>
           <td>${patientBadge(p)}</td>
           <td><span class="severity severity--${s.severity}">${s.severity}</span></td>
-          <td>${escapeHtml(s.description || '—')}</td>
-          <td>${s.resolved_at ? `<span class="badge badge--success">Yes</span>` : '<span class="badge badge--muted">No</span>'}</td>
+          <td class="col-optional">${escapeHtml(s.description || '—')}</td>
+          <td class="col-optional">${s.resolved_at ? `<span class="badge badge--success">Yes</span>` : '<span class="badge badge--muted">No</span>'}</td>
           <td class="td-actions">
             <button class="btn--icon edit-sym" data-id="${s.id}" title="Edit">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

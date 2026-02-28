@@ -460,6 +460,23 @@ tbody tr:hover td { background: var(--color-bg); }
   .detail-grid { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 640px) {
+  /* Hide non-essential table columns on small screens */
+  .col-optional { display: none; }
+
+  /* Let filter inputs grow to fill available row space */
+  .filter-bar select,
+  .filter-bar input[type="date"] {
+    flex: 1;
+    min-width: 130px;
+  }
+
+  /* Ensure table wrapper never escapes its container */
+  .table-wrapper {
+    max-width: 100%;
+  }
+}
+
 /* ─── Login page ──────────────────────────────────────────── */
 #login-page {
   min-height: 100vh;
