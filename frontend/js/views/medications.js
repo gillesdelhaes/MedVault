@@ -64,7 +64,7 @@ async function renderMedicationsView() {
       const p = patientMap[m.patient_id];
       const today = new Date().toISOString().slice(0, 10);
       const isActive = m.is_ongoing || !m.end_date || m.end_date >= today;
-      return `<div class="card">
+      return `<div class="card clickable-row" data-id="${m.id}" style="cursor:pointer">
         <div class="card-header">
           <div>
             <div style="font-weight:600;margin-bottom:4px">${escapeHtml(m.name)}</div>
@@ -75,18 +75,6 @@ async function renderMedicationsView() {
             <button class="btn--icon log-dose-btn" data-id="${m.id}" data-name="${escapeHtml(m.name)}" title="Log Dose">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
-            </button>
-            <button class="btn--icon edit-med" data-id="${m.id}" title="Edit">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="btn--icon delete-med" data-id="${m.id}" title="Delete">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
-                <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
               </svg>
             </button>
           </div>
@@ -102,31 +90,25 @@ async function renderMedicationsView() {
       </div>`;
     }).join('')}</div>`;
 
-    el.querySelectorAll('.edit-med').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const med = await api.getMedication(btn.dataset.id);
+    el.querySelectorAll('.clickable-row').forEach(card => {
+      card.addEventListener('click', async () => {
+        const med = await api.getMedication(card.dataset.id);
         openMedModal(med, patients, reloadList);
       });
     });
 
-    el.querySelectorAll('.delete-med').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const ok = await modal.confirm('Delete this medication and all its dose logs?');
-        if (!ok) return;
-        try {
-          await api.deleteMedication(btn.dataset.id);
-          toast.success('Medication deleted');
-          reloadList();
-        } catch (err) { toast.error(err.message); }
+    el.querySelectorAll('.log-dose-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openDoseModal(btn.dataset.id, btn.dataset.name);
       });
     });
 
-    el.querySelectorAll('.log-dose-btn').forEach(btn => {
-      btn.addEventListener('click', () => openDoseModal(btn.dataset.id, btn.dataset.name));
-    });
-
     el.querySelectorAll('.view-doses-btn').forEach(btn => {
-      btn.addEventListener('click', () => openDoseHistoryModal(btn.dataset.id, allMeds));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openDoseHistoryModal(btn.dataset.id, allMeds);
+      });
     });
   }
 
@@ -183,8 +165,12 @@ function openMedModal(med, patients, onSave) {
         <textarea id="m-notes" class="form-textarea">${escapeHtml(med?.notes || '')}</textarea>
       </div>
     </form>`,
-    footer: `<button class="btn btn--ghost" id="mm-cancel">Cancel</button>
-             <button class="btn btn--primary" id="mm-save">${isEdit ? 'Save Changes' : 'Add Medication'}</button>`,
+    footer: isEdit
+      ? `<button class="btn btn--danger" id="mm-delete" style="margin-right:auto">Delete</button>
+         <button class="btn btn--ghost" id="mm-cancel">Cancel</button>
+         <button class="btn btn--primary" id="mm-save">Save Changes</button>`
+      : `<button class="btn btn--ghost" id="mm-cancel">Cancel</button>
+         <button class="btn btn--primary" id="mm-save">Add Medication</button>`,
   });
 
   const ongoingCb = m.el.querySelector('#m-ongoing');
@@ -192,6 +178,19 @@ function openMedModal(med, patients, onSave) {
   ongoingCb.addEventListener('change', () => {
     endGroup.style.display = ongoingCb.checked ? 'none' : '';
   });
+
+  if (isEdit) {
+    m.el.querySelector('#mm-delete').addEventListener('click', async () => {
+      const ok = await modal.confirm('Delete this medication and all its dose logs?');
+      if (!ok) return;
+      try {
+        await api.deleteMedication(med.id);
+        toast.success('Medication deleted');
+        m.close();
+        if (onSave) onSave(); else renderMedicationsView();
+      } catch (err) { toast.error(err.message); }
+    });
+  }
 
   m.el.querySelector('#mm-cancel').addEventListener('click', m.close);
   m.el.querySelector('#mm-save').addEventListener('click', async () => {
@@ -270,7 +269,7 @@ async function openDoseHistoryModal(medicationId, allMeds) {
   let doses;
   try { doses = await api.getDoses(medicationId); } catch (err) { toast.error(err.message); return; }
 
-  const m = modal.open({
+  modal.open({
     title: `Dose History — ${med?.name || ''}`,
     body: doses.length === 0
       ? '<p style="color:var(--color-text-muted)">No doses logged yet.</p>'

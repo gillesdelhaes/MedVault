@@ -60,50 +60,24 @@ async function renderSymptomsView() {
     if (!list.length) { el.innerHTML = emptyState('No symptom logs found.'); return; }
     el.innerHTML = `<div class="table-wrapper"><table>
       <thead><tr>
-        <th>Date</th><th>Patient</th><th>Severity</th><th class="col-optional">Description</th><th class="col-optional">Resolved</th><th></th>
+        <th>Date</th><th>Patient</th><th>Severity</th><th class="col-optional">Description</th><th class="col-optional">Resolved</th>
       </tr></thead>
       <tbody>${list.map(s => {
         const p = patientMap[s.patient_id];
-        return `<tr>
+        return `<tr class="clickable-row" data-id="${s.id}" style="cursor:pointer">
           <td style="white-space:nowrap">${formatDateTime(s.logged_at)}</td>
           <td>${patientBadge(p)}</td>
           <td><span class="severity severity--${s.severity}">${s.severity}</span></td>
           <td class="col-optional">${escapeHtml(s.description || '—')}</td>
           <td class="col-optional">${s.resolved_at ? `<span class="badge badge--success">Yes</span>` : '<span class="badge badge--muted">No</span>'}</td>
-          <td class="td-actions">
-            <button class="btn--icon edit-sym" data-id="${s.id}" title="Edit">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="btn--icon delete-sym" data-id="${s.id}" title="Delete">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
-                <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
-              </svg>
-            </button>
-          </td>
         </tr>`;
       }).join('')}</tbody>
     </table></div>`;
 
-    el.querySelectorAll('.edit-sym').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const sym = await api.getSymptom(btn.dataset.id);
+    el.querySelectorAll('.clickable-row').forEach(row => {
+      row.addEventListener('click', async () => {
+        const sym = await api.getSymptom(row.dataset.id);
         openSymptomModal(sym, patients, reloadList);
-      });
-    });
-
-    el.querySelectorAll('.delete-sym').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const ok = await modal.confirm('Delete this symptom log?');
-        if (!ok) return;
-        try {
-          await api.deleteSymptom(btn.dataset.id);
-          toast.success('Symptom log deleted');
-          reloadList();
-        } catch (err) { toast.error(err.message); }
       });
     });
   }
@@ -155,9 +129,26 @@ function openSymptomModal(sym, patients, onSave) {
         <textarea id="s-notes" class="form-textarea">${escapeHtml(sym?.notes || '')}</textarea>
       </div>
     </form>`,
-    footer: `<button class="btn btn--ghost" id="sm-cancel">Cancel</button>
-             <button class="btn btn--primary" id="sm-save">${isEdit ? 'Save Changes' : 'Log Symptom'}</button>`,
+    footer: isEdit
+      ? `<button class="btn btn--danger" id="sm-delete" style="margin-right:auto">Delete</button>
+         <button class="btn btn--ghost" id="sm-cancel">Cancel</button>
+         <button class="btn btn--primary" id="sm-save">Save Changes</button>`
+      : `<button class="btn btn--ghost" id="sm-cancel">Cancel</button>
+         <button class="btn btn--primary" id="sm-save">Log Symptom</button>`,
   });
+
+  if (isEdit) {
+    m.el.querySelector('#sm-delete').addEventListener('click', async () => {
+      const ok = await modal.confirm('Delete this symptom log?');
+      if (!ok) return;
+      try {
+        await api.deleteSymptom(sym.id);
+        toast.success('Symptom log deleted');
+        m.close();
+        if (onSave) onSave(); else renderSymptomsView();
+      } catch (err) { toast.error(err.message); }
+    });
+  }
 
   m.el.querySelector('#sm-cancel').addEventListener('click', m.close);
   m.el.querySelector('#sm-save').addEventListener('click', async () => {

@@ -33,6 +33,14 @@
   margin-top: 0;
 }
 
+.card.clickable-row {
+  transition: background 0.15s, border-color 0.15s;
+}
+.card.clickable-row:hover {
+  background: var(--color-bg);
+  border-color: var(--color-primary);
+}
+
 /* ─── Buttons ────────────────────────────────────────────── */
 .btn {
   display: inline-flex;

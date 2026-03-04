@@ -54,50 +54,24 @@ async function renderAppointmentsView() {
     if (!list.length) { el.innerHTML = emptyState('No appointments found.'); return; }
     el.innerHTML = `<div class="table-wrapper"><table>
       <thead><tr>
-        <th>Date & Time</th><th>Patient</th><th>Provider</th><th class="col-optional">Reason</th><th class="col-optional">Follow-up</th><th></th>
+        <th>Date & Time</th><th>Patient</th><th>Provider</th><th class="col-optional">Reason</th><th class="col-optional">Follow-up</th>
       </tr></thead>
       <tbody>${list.map(a => {
         const p = patientMap[a.patient_id];
-        return `<tr>
+        return `<tr class="clickable-row" data-id="${a.id}" style="cursor:pointer">
           <td style="white-space:nowrap">${formatDateTime(a.datetime)}</td>
           <td>${patientBadge(p)}</td>
           <td>${escapeHtml(a.provider_name)}</td>
           <td class="col-optional">${escapeHtml(a.reason || '—')}</td>
           <td class="col-optional">${a.follow_up_required ? '<span class="badge badge--warning">Yes</span>' : '<span class="badge badge--muted">No</span>'}</td>
-          <td class="td-actions">
-            <button class="btn--icon edit-appt" data-id="${a.id}" title="Edit">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="btn--icon delete-appt" data-id="${a.id}" title="Delete">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
-                <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
-              </svg>
-            </button>
-          </td>
         </tr>`;
       }).join('')}</tbody>
     </table></div>`;
 
-    el.querySelectorAll('.edit-appt').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const appt = await api.getAppointment(btn.dataset.id);
+    el.querySelectorAll('.clickable-row').forEach(row => {
+      row.addEventListener('click', async () => {
+        const appt = await api.getAppointment(row.dataset.id);
         openApptModal(appt, patients, reloadList);
-      });
-    });
-
-    el.querySelectorAll('.delete-appt').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const ok = await modal.confirm('Delete this appointment?');
-        if (!ok) return;
-        try {
-          await api.deleteAppointment(btn.dataset.id);
-          toast.success('Appointment deleted');
-          reloadList();
-        } catch (err) { toast.error(err.message); }
       });
     });
   }
@@ -149,9 +123,26 @@ function openApptModal(appt, patients, onSave) {
         <textarea id="a-notes" class="form-textarea">${escapeHtml(appt?.notes || '')}</textarea>
       </div>
     </form>`,
-    footer: `<button class="btn btn--ghost" id="am-cancel">Cancel</button>
-             <button class="btn btn--primary" id="am-save">${isEdit ? 'Save Changes' : 'Add Appointment'}</button>`,
+    footer: isEdit
+      ? `<button class="btn btn--danger" id="am-delete" style="margin-right:auto">Delete</button>
+         <button class="btn btn--ghost" id="am-cancel">Cancel</button>
+         <button class="btn btn--primary" id="am-save">Save Changes</button>`
+      : `<button class="btn btn--ghost" id="am-cancel">Cancel</button>
+         <button class="btn btn--primary" id="am-save">Add Appointment</button>`,
   });
+
+  if (isEdit) {
+    m.el.querySelector('#am-delete').addEventListener('click', async () => {
+      const ok = await modal.confirm('Delete this appointment?');
+      if (!ok) return;
+      try {
+        await api.deleteAppointment(appt.id);
+        toast.success('Appointment deleted');
+        m.close();
+        if (onSave) onSave(); else renderAppointmentsView();
+      } catch (err) { toast.error(err.message); }
+    });
+  }
 
   m.el.querySelector('#am-cancel').addEventListener('click', m.close);
   m.el.querySelector('#am-save').addEventListener('click', async () => {

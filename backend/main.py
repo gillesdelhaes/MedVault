@@ -46,6 +46,20 @@ if os.path.isdir(frontend_path):
     app.mount("/js", StaticFiles(directory=os.path.join(frontend_path, "js")), name="js")
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="assets")
 
+    @app.get("/manifest.json", include_in_schema=False)
+    def serve_manifest():
+        return FileResponse(
+            os.path.join(frontend_path, "manifest.json"),
+            media_type="application/manifest+json",
+        )
+
+    @app.get("/sw.js", include_in_schema=False)
+    def serve_sw():
+        return FileResponse(
+            os.path.join(frontend_path, "sw.js"),
+            media_type="application/javascript",
+        )
+
     @app.get("/{full_path:path}", include_in_schema=False)
     def serve_spa(full_path: str):
         index = os.path.join(frontend_path, "index.html")
